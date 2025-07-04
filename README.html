@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boardroom Lab: Growth Engineering OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: A top-down narrative dashboard. It starts with a high-level Executive Overview of the sales funnel. Users can then dive deeper into Funnel Performance to diagnose stage-specific issues. Next, the Persona & Campaign Analysis section allows for granular filtering to see what resonates with whom. Finally, the Strategic Levers & Prompt Lab provides actionable solutions, showcasing how revised AI prompts can fix the diagnosed problems. This structure mirrors a strategic workflow: see the problem, diagnose the cause, analyze the segments, and apply the solution. It was chosen to make the abstract concepts of the report (funnel analysis, persona targeting, prompt engineering) tangible and interactive for a boardroom audience. -->
+    <!-- Visualization & Content Choices: 
+        - Executive Funnel (Goal: Inform): A horizontal bar chart (HTML/CSS) for a clear, high-level view of the funnel flow. Interaction: Hover effects show conversion rates. Justification: More visually engaging than a simple list and provides an immediate health check.
+        - Funnel Diagnosis (Goal: Organize/Compare): Interactive cards (HTML/JS) revealed on click. Interaction: Clicking a funnel stage shows a detailed card with metrics and qualitative reasons for drop-off. Justification: Encourages user-led exploration and prevents information overload.
+        - Persona Performance (Goal: Compare): Doughnut and Bar charts (Chart.js). Interaction: Filters update charts dynamically. Justification: Chart.js is ideal for comparing categorical data like persona effectiveness.
+        - Campaign AIDCA Diagnosis (Goal: Organize): An interactive HTML table. Interaction: Filters change the displayed data. Justification: A table is the clearest way to present structured diagnostic data across multiple campaigns and stages.
+        - Prompt Lab (Goal: Inform/Organize): A dropdown-driven display of formatted text blocks (HTML/JS). Interaction: Selecting a scenario shows the corresponding AI prompt with highlighted principles. Justification: This makes the abstract concept of prompt engineering a concrete, educational tool.
+        - All choices adhere to the NO SVG/Mermaid rule. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .aidca-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 8px;
+            text-transform: uppercase;
+        }
+        .cialdini-tag {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-800">Growth Engineering OS</h1>
+            <p class="mt-2 text-lg text-slate-600">Boardroom Lab: Translating Funnel Data into Prompted Strategy</p>
+        </header>
+
+        <main class="space-y-12">
+
+            <!-- Section 1: Executive Overview -->
+            <section id="overview">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-1">Executive Funnel Overview</h2>
+                    <p class="text-slate-600 mb-6">This section provides a high-level snapshot of the entire sales funnel performance for the selected period. Hover over each stage to see the conversion rate from the previous step.</p>
+                    <div id="funnel-kpis" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-center">
+                        <!-- KPIs will be injected here -->
+                    </div>
+                    <div id="funnel-visualization" class="space-y-2">
+                        <!-- Funnel bars will be injected here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Funnel Performance & Diagnosis -->
+            <section id="diagnosis">
+                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-1">Funnel Performance & Diagnosis</h2>
+                    <p class="text-slate-600 mb-6">Click on any funnel transition below to diagnose performance issues. This reveals stage-specific conversion rates, hypothetical drop-off reasons, and the type of messaging used, helping to identify key bottlenecks.</p>
+                    <div id="funnel-stages" class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-4">
+                        <!-- Funnel stages will be injected here -->
+                    </div>
+                    <div id="diagnosis-card-container" class="mt-6"></div>
+                 </div>
+            </section>
+
+            <!-- Section 3: Persona & Campaign Analysis -->
+            <section id="analysis">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-1">Persona & Campaign Analysis</h2>
+                    <p class="text-slate-600 mb-6">Use the filters to analyze performance by target persona. This helps answer: Are we targeting the right people? And are our messages resonating with specific segments?</p>
+                    <div class="flex flex-wrap gap-4 mb-6">
+                        <select id="persona-filter" class="bg-stone-100 border border-stone-200 rounded-lg p-2">
+                            <option value="all">All Personas</option>
+                            <option value="CTO - D2C">CTO - D2C</option>
+                            <option value="COO - Pharma">COO - Pharma</option>
+                        </select>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div class="chart-container mx-auto">
+                            <canvas id="personaConversionChart"></canvas>
+                        </div>
+                        <div class="chart-container mx-auto">
+                            <canvas id="clientMixChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">Campaign AIDCA Diagnosis</h3>
+                        <p class="text-slate-600 mb-4">This table shows which stage of the AIDCA framework is underperforming for each campaign, guiding targeted content revisions.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-stone-100">
+                                    <tr>
+                                        <th class="p-3">Campaign</th>
+                                        <th class="p-3">Persona</th>
+                                        <th class="p-3">Problem</th>
+                                        <th class="p-3 text-center">Attention</th>
+                                        <th class="p-3 text-center">Interest</th>
+                                        <th class="p-3 text-center">Desire</th>
+                                        <th class="p-3 text-center">Conviction</th>
+                                        <th class="p-3 text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="campaign-diagnosis-table">
+                                    <!-- Table rows will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Strategic Levers & Prompt Lab -->
+            <section id="levers">
+                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-1">Strategic Levers & Prompt Lab</h2>
+                    <p class="text-slate-600 mb-6">Select a diagnosed funnel problem to see a revised AI prompt designed to fix it. This lab demonstrates how strategic prompting, combining the AIDCA model with Cialdini's principles, can create more effective messaging.</p>
+                     <div class="md:flex md:space-x-6">
+                        <div class="md:w-1/3">
+                             <label for="prompt-selector" class="block font-medium text-slate-700 mb-2">Select Funnel Problem:</label>
+                             <select id="prompt-selector" class="w-full bg-stone-100 border border-stone-200 rounded-lg p-2 mb-6">
+                                <option value="0">High MQL, Low SQL</option>
+                                <option value="1">Low Overall Conversion</option>
+                                <option value="2">High SQL, Low Client</option>
+                             </select>
+                             <div id="prompt-justification" class="text-sm p-4 bg-teal-50 text-teal-800 border-l-4 border-teal-500 rounded-r-lg">
+                                <!-- Justification text will be injected here -->
+                             </div>
+                        </div>
+                        <div class="md:w-2/3 mt-6 md:mt-0">
+                             <div id="prompt-display" class="bg-slate-800 text-stone-200 rounded-lg p-6 font-mono text-sm leading-relaxed overflow-x-auto">
+                                <!-- Prompt will be injected here -->
+                             </div>
+                        </div>
+                     </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const data = {
+            funnelData: {
+                all: { leads: 10000, mqls: 2000, sqls: 250, clients: 25 },
+                "CTO - D2C": { leads: 6000, mqls: 1500, sqls: 150, clients: 18 },
+                "COO - Pharma": { leads: 4000, mqls: 500, sqls: 100, clients: 7 },
+            },
+            diagnosisData: [
+                {
+                    stage: 'Lead > MQL',
+                    conversion: '5%',
+                    reason: 'Initial messages are not compelling. Target audience feels misunderstood.',
+                    messageSummary: 'Broad, industry-agnostic messaging with a generic "Learn More" CTA.'
+                },
+                {
+                    stage: 'MQL > SQL',
+                    conversion: '2.5%',
+                    reason: 'MQLs don\'t see immediate relevance and perceive content as too "salesy".',
+                    messageSummary: 'Nurturing focused on product features without deep problem-solving context.'
+                },
+                {
+                    stage: 'SQL > Client',
+                    conversion: '10%',
+                    reason: 'Lack of final conviction due to concerns about implementation complexity and ROI.',
+                    messageSummary: 'Messaging lacked strong case studies or risk-mitigation content.'
+                }
+            ],
+            campaignDiagnosis: [
+                { campaign: 'Q2 Growth Push', persona: 'All', problem: 'Low MQL-SQL Conv.', aidca: ['ok', 'ok', 'bad', 'bad', 'ok'] },
+                { campaign: 'Pharma Outreach', persona: 'COO - Pharma', problem: 'Low Lead-MQL Conv.', aidca: ['bad', 'bad', 'ok', 'ok', 'ok'] },
+                { campaign: 'D2C Tech Scale', persona: 'CTO - D2C', problem: 'Low SQL-Client Conv.', aidca: ['ok', 'ok', 'ok', 'bad', 'bad'] },
+            ],
+            prompts: [
+                {
+                    title: 'High MQL, Low SQL',
+                    justification: 'This prompt solves the trust drop at the SQL stage by anchoring with a specific, valuable insight (Reciprocity). It shifts from feature-centric to value-centric messaging, providing context and building Desire & Conviction.',
+                    content: `<span class="text-teal-400">// AIDCA Stage: Desire & Conviction</span><br><span class="text-teal-400">// Cialdini Principle: Reciprocity</span><br><br>Generate an email for a Manufacturing MQL who downloaded our 'Industry 4.0 Trends' report. Acknowledge their interest, then immediately offer a mini-case study or a practical insight (e.g., "How a peer firm reduced downtime by 15%"). This should demonstrate deep industry understanding. Then, subtly suggest a brief, no-obligation 'strategy session' to explore these insights in their context.`
+                },
+                {
+                    title: 'Low Overall Conversion',
+                    justification: 'This prompt fixes the low top-of-funnel conversion by focusing on a strong Attention hook and building Interest with a specific problem. The Liking principle builds rapport by showing empathy.',
+                    content: `<span class="text-teal-400">// AIDCA Stage: Attention & Interest</span><br><span class="text-teal-400">// Cialdini Principle: Liking</span><br><br>Generate a cold email for a Supply Chain Director. Start with an Attention-grabbing opening that acknowledges a specific challenge (e.g., 'Navigating holiday logistics bottlenecks'). Immediately follow with an Interest-building statement hinting at a novel approach (e.g., '...a strategy that reduces last-mile costs by 18%'). The CTA should be to a high-value whitepaper.`
+                },
+                {
+                    title: 'High SQL, Low Client',
+                    justification: 'This prompt targets the final objections by injecting Authority (case studies) and reinforcing Consistency (with proven results). It builds the final layer of trust needed for conversion.',
+                    content: `<span class="text-teal-400">// AIDCA Stage: Conviction & Action</span><br><span class="text-teal-400">// Cialdini Principles: Authority & Consistency</span><br><br>Generate an email for a Financial Services SQL who has integration/ROI concerns. Acknowledge their concerns empathetically. Immediately provide a concise, high-impact case study from a similar institution with quantifiable results. Include a client quote. The CTA is to schedule an 'ROI & Implementation Deep Dive' session.`
+                },
+            ]
+        };
+
+        let personaConversionChart, clientMixChart;
+
+        const updateFunnel = (persona = 'all') => {
+            const funnel = data.funnelData[persona];
+            const kpiContainer = document.getElementById('funnel-kpis');
+            const funnelVizContainer = document.getElementById('funnel-visualization');
+
+            const kpis = [
+                { label: 'Leads', value: funnel.leads },
+                { label: 'MQLs', value: funnel.mqls },
+                { label: 'SQLs', value: funnel.sqls },
+                { label: 'Clients', value: funnel.clients },
+            ];
+            
+            kpiContainer.innerHTML = kpis.map(kpi => `
+                <div class="bg-stone-100 p-4 rounded-lg">
+                    <p class="text-3xl font-bold text-slate-700">${kpi.value.toLocaleString()}</p>
+                    <p class="text-sm text-slate-500">${kpi.label}</p>
+                </div>
+            `).join('');
+
+            const maxVal = funnel.leads;
+            const vizData = [
+                { label: 'Leads', value: funnel.leads, color: 'bg-teal-500', conv: 100 },
+                { label: 'MQLs', value: funnel.mqls, color: 'bg-teal-600', conv: (funnel.mqls / funnel.leads * 100) },
+                { label: 'SQLs', value: funnel.sqls, color: 'bg-teal-700', conv: (funnel.sqls / funnel.mqls * 100) },
+                { label: 'Clients', value: funnel.clients, color: 'bg-slate-700', conv: (funnel.clients / funnel.sqls * 100) },
+            ];
+
+            funnelVizContainer.innerHTML = vizData.map((item, index) => `
+                <div class="relative group" title="${index > 0 ? `Conversion: ${item.conv.toFixed(1)}%` : ''}">
+                    <div class="flex justify-between items-center text-sm font-medium mb-1 px-1">
+                        <span class="text-slate-700">${item.label}</span>
+                        <span class="text-slate-500">${item.value.toLocaleString()}</span>
+                    </div>
+                    <div class="bg-stone-200 rounded-full h-4">
+                        <div class="${item.color} h-4 rounded-full transition-all duration-500" style="width: ${(item.value / maxVal) * 100}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        };
+        
+        const renderDiagnosisStages = () => {
+            const container = document.getElementById('funnel-stages');
+            const stages = data.diagnosisData.map(d => d.stage);
+            
+            container.innerHTML = `
+                <div class="font-semibold text-slate-700">Leads</div>
+                <div class="text-2xl text-slate-400 transform md:rotate-90">→</div>
+                <button data-stage="0" class="funnel-stage-btn bg-white hover:bg-stone-100 border border-stone-300 rounded-lg px-4 py-2 transition-all">MQLs</button>
+                <div class="text-2xl text-slate-400 transform md:rotate-90">→</div>
+                <button data-stage="1" class="funnel-stage-btn bg-white hover:bg-stone-100 border border-stone-300 rounded-lg px-4 py-2 transition-all">SQLs</button>
+                <div class="text-2xl text-slate-400 transform md:rotate-90">→</div>
+                <button data-stage="2" class="funnel-stage-btn bg-white hover:bg-stone-100 border border-stone-300 rounded-lg px-4 py-2 transition-all">Clients</button>
+            `;
+        };
+
+        const showDiagnosisCard = (stageIndex) => {
+            const container = document.getElementById('diagnosis-card-container');
+            const stageData = data.diagnosisData[stageIndex];
+            
+            document.querySelectorAll('.funnel-stage-btn').forEach(btn => {
+                btn.classList.remove('bg-teal-500', 'text-white', 'border-teal-500');
+                btn.classList.add('bg-white', 'hover:bg-stone-100');
+            });
+            const selectedBtn = document.querySelector(`.funnel-stage-btn[data-stage="${stageIndex}"]`);
+            selectedBtn.classList.add('bg-teal-500', 'text-white', 'border-teal-500');
+            selectedBtn.classList.remove('bg-white', 'hover:bg-stone-100');
+
+            container.innerHTML = `
+                <div class="bg-stone-100 p-6 rounded-lg border border-stone-200 animate-fade-in">
+                    <h3 class="text-xl font-bold text-slate-800">${stageData.stage} Diagnosis</h3>
+                    <div class="grid md:grid-cols-3 gap-6 mt-4">
+                        <div>
+                            <p class="text-sm text-slate-500">Conversion Rate</p>
+                            <p class="text-3xl font-bold text-red-500">${stageData.conversion}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">Hypothetical Drop-off Reason</p>
+                            <p class="font-medium text-slate-700">${stageData.reason}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">Campaign Message Summary</p>
+                            <p class="font-medium text-slate-700">${stageData.messageSummary}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Quick fade-in animation
+            const card = container.querySelector('.animate-fade-in');
+            card.style.opacity = 0;
+            setTimeout(() => card.style.opacity = 1, 10);
+        };
+        
+        const updateCharts = (persona = 'all') => {
+            const personaCtx = document.getElementById('personaConversionChart').getContext('2d');
+            const clientMixCtx = document.getElementById('clientMixChart').getContext('2d');
+
+            const labels = ['Lead > MQL', 'MQL > SQL', 'SQL > Client'];
+            const allData = [
+                (data.funnelData.all.mqls / data.funnelData.all.leads),
+                (data.funnelData.all.sqls / data.funnelData.all.mqls),
+                (data.funnelData.all.clients / data.funnelData.all.sqls),
+            ].map(v => v * 100);
+
+            const ctoData = [
+                (data.funnelData['CTO - D2C'].mqls / data.funnelData['CTO - D2C'].leads),
+                (data.funnelData['CTO - D2C'].sqls / data.funnelData['CTO - D2C'].mqls),
+                (data.funnelData['CTO - D2C'].clients / data.funnelData['CTO - D2C'].sqls),
+            ].map(v => v * 100);
+
+            const cooData = [
+                (data.funnelData['COO - Pharma'].mqls / data.funnelData['COO - Pharma'].leads),
+                (data.funnelData['COO - Pharma'].sqls / data.funnelData['COO - Pharma'].mqls),
+                (data.funnelData['COO - Pharma'].clients / data.funnelData['COO - Pharma'].sqls),
+            ].map(v => v * 100);
+
+            let datasets;
+            if (persona === 'all') {
+                datasets = [
+                    { label: 'Overall', data: allData, backgroundColor: 'rgba(20, 150, 150, 0.6)', borderColor: 'rgb(20, 150, 150)', borderWidth: 1 },
+                    { label: 'CTO - D2C', data: ctoData, backgroundColor: 'rgba(71, 85, 105, 0.6)', borderColor: 'rgb(71, 85, 105)', borderWidth: 1 },
+                    { label: 'COO - Pharma', data: cooData, backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: 'rgb(239, 68, 68)', borderWidth: 1 },
+                ]
+            } else if (persona === 'CTO - D2C') {
+                 datasets = [{ label: 'CTO - D2C', data: ctoData, backgroundColor: 'rgba(71, 85, 105, 0.6)', borderColor: 'rgb(71, 85, 105)', borderWidth: 1 }]
+            } else { // COO - Pharma
+                 datasets = [{ label: 'COO - Pharma', data: cooData, backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: 'rgb(239, 68, 68)', borderWidth: 1 }]
+            }
+            
+            if (personaConversionChart) personaConversionChart.destroy();
+            personaConversionChart = new Chart(personaCtx, {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Conversion Rate by Persona', font: {size: 16} },
+                        tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%` } }
+                    },
+                    scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + '%' } } }
+                }
+            });
+
+            if (clientMixChart) clientMixChart.destroy();
+            clientMixChart = new Chart(clientMixCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CTO - D2C', 'COO - Pharma'],
+                    datasets: [{
+                        label: 'Client Mix',
+                        data: [data.funnelData['CTO - D2C'].clients, data.funnelData['COO - Pharma'].clients],
+                        backgroundColor: ['rgb(71, 85, 105)', 'rgb(239, 68, 68)'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'Acquired Client Mix', font: {size: 16} } }
+                }
+            });
+        };
+
+        const updateCampaignTable = (persona = 'all') => {
+            const tableBody = document.getElementById('campaign-diagnosis-table');
+            const filteredData = persona === 'all' 
+                ? data.campaignDiagnosis 
+                : data.campaignDiagnosis.filter(c => c.persona === persona || c.persona === 'All');
+
+            const statusIndicator = (status) => {
+                if (status === 'ok') return '<span class="text-green-500 text-2xl">●</span>';
+                if (status === 'bad') return '<span class="text-red-500 text-2xl">●</span>';
+                return '<span class="text-yellow-500 text-2xl">●</span>';
+            }
+
+            tableBody.innerHTML = filteredData.map(row => `
+                <tr class="border-b border-stone-200 hover:bg-stone-50">
+                    <td class="p-3 font-medium">${row.campaign}</td>
+                    <td class="p-3">${row.persona}</td>
+                    <td class="p-3 text-red-600">${row.problem}</td>
+                    ${row.aidca.map(status => `<td class="p-3 text-center">${statusIndicator(status)}</td>`).join('')}
+                </tr>
+            `).join('');
+        };
+        
+        const updatePromptDisplay = (index = 0) => {
+            const prompt = data.prompts[index];
+            document.getElementById('prompt-display').innerHTML = prompt.content;
+            document.getElementById('prompt-justification').innerHTML = `<p class="font-bold mb-2">${prompt.title}</p><p>${prompt.justification}</p>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateFunnel();
+            renderDiagnosisStages();
+            showDiagnosisCard(1); // Default to MQL->SQL
+            updateCharts();
+            updateCampaignTable();
+            updatePromptDisplay();
+
+            document.getElementById('persona-filter').addEventListener('change', (e) => {
+                updateFunnel(e.target.value);
+                updateCharts(e.target.value);
+                updateCampaignTable(e.target.value);
+            });
+            
+            document.getElementById('funnel-stages').addEventListener('click', (e) => {
+                if (e.target.matches('.funnel-stage-btn')) {
+                    const stageIndex = e.target.getAttribute('data-stage');
+                    showDiagnosisCard(stageIndex);
+                }
+            });
+            
+            document.getElementById('prompt-selector').addEventListener('change', (e) => {
+                updatePromptDisplay(e.target.value);
+            });
+        });
+
+    </script>
+</body>
+</html>
